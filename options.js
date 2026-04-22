@@ -135,7 +135,8 @@ async function refreshConnectionStatus() {
   setConnStatus('checking');
   const result = await checkConnection();
   if (result.ok) {
-    const versions = result.apiVersions ? `Latest API: v${result.apiVersions.slice(-1)[0]}` : '';
+    const lastVersion = result.apiVersions?.length ? result.apiVersions.slice(-1)[0] : null;
+    const versions = lastVersion ? `Latest API: v${lastVersion}` : '';
     setConnStatus('ok', versions);
     els.btnDisconnect.style.display = '';
   } else {
@@ -251,7 +252,8 @@ function downloadLogs() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
   a.href     = url;
-  a.download = `flow-drafter-logs-${new Date().toISOString().slice(0,19).replace(/:/g,'-')}.txt`;
+  const ts = new Date().toISOString().replace(/[-:T]/g, '').slice(0, 14); // yyyyMMddHHmmss
+  a.download = `flow-drafter-logs-${ts}.txt`;
   a.click();
   URL.revokeObjectURL(url);
 }

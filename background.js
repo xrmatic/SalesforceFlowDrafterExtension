@@ -108,6 +108,17 @@ async function handleMessage(msg) {
     case 'GET_LOGS':
       return { logs: log.getEntries() };
 
+    case 'UPDATE_POLL_INTERVAL': {
+      const intervalMin = Math.max(1, Math.min(60, Number(msg.interval) || POLL_INTERVAL_MIN));
+      await chrome.alarms.clear(ALARM_NAME);
+      chrome.alarms.create(ALARM_NAME, {
+        delayInMinutes:  intervalMin,
+        periodInMinutes: intervalMin,
+      });
+      log.info(`Poll interval updated to ${intervalMin} min`);
+      return { ok: true, intervalMin };
+    }
+
     default:
       return { error: `Unknown message type: ${msg.type}` };
   }

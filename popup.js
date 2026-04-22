@@ -9,7 +9,7 @@ import { log }                                      from './lib/logger.js';
 // Constants
 // ---------------------------------------------------------------------------
 const MAX_HISTORY_SESSIONS = 30;
-const MAX_CHAT_TURNS        = 20;  // keep memory bounded
+const MAX_CHAT_MESSAGES    = 40;  // max chat-history entries (user+assistant) kept in memory
 
 // ---------------------------------------------------------------------------
 // State
@@ -210,12 +210,6 @@ async function handleSend() {
   el.chatInput.value = '';
   adjustTextarea();
 
-  // Truncate history to keep memory bounded
-  if (chatHistory.length > MAX_CHAT_TURNS * 2) {
-    chatHistory = chatHistory.slice(-MAX_CHAT_TURNS * 2);
-    log.warn(`Chat history truncated to ${chatHistory.length} entries`);
-  }
-
   showTyping(true);
   el.btnSend.disabled = true;
 
@@ -233,13 +227,17 @@ async function handleSend() {
       userMessage: userMsg,
     });
 
-    // Update history (both sides)
+    // Update history (both sides) then enforce the cap
     chatHistory.push({ role: 'user',      content: userMsg });
     chatHistory.push({ role: 'assistant', content: reply  });
+    if (chatHistory.length > MAX_CHAT_MESSAGES) {
+      chatHistory = chatHistory.slice(-MAX_CHAT_MESSAGES);
+      log.warn(`Chat history truncated to ${chatHistory.length} entries`);
+    }
 
-    // Extract XML from the reply
+    // Extract XML from the reply (xml is already trimmed by extractXml)
     const xml = extractXml(reply);
-    const hasXml = xml.startsWith('<?xml') || xml.includes('<Flow');
+    const hasXml = /^(<\?xml|<Flow[\s\/>])/i.test(xml);
 
     // Show short assistant message with action hint
     if (hasXml) {
