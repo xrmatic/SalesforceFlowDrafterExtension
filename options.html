@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salesforce Flow Drafter – Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+
+<header>
+  <img src="icons/icon48.png" alt="Flow Drafter logo">
+  <div>
+    <h1>Salesforce Flow Drafter – Settings</h1>
+    <p>Configure your AI provider and Salesforce connection</p>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- ── AI Configuration ────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">🤖</span> AI Configuration
+    </div>
+    <div class="card-body">
+
+      <div class="row">
+        <div class="form-group">
+          <label for="aiProvider">AI Provider <span class="required">*</span></label>
+          <select id="aiProvider">
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic (Claude)</option>
+            <option value="custom">Custom / OpenAI-compatible</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="aiModel">Model</label>
+          <select id="aiModel"></select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label for="aiApiKey">API Key <span class="required">*</span></label>
+        <input type="password" id="aiApiKey" placeholder="sk-…  or  sk-ant-…" autocomplete="off">
+        <p class="hint">Stored locally in your browser – never transmitted to any server other than your chosen AI provider.</p>
+      </div>
+
+      <div class="form-group" id="customEndpointGroup" style="display:none">
+        <label for="aiBaseUrl">Custom Endpoint Base URL <span class="required">*</span></label>
+        <input type="url" id="aiBaseUrl" placeholder="http://localhost:11434">
+        <p class="hint">Must expose an OpenAI-compatible <code>/v1/chat/completions</code> endpoint (e.g. Ollama, LM Studio, vLLM).</p>
+      </div>
+
+      <div class="row">
+        <div class="form-group">
+          <label for="aiMaxTokens">Max tokens</label>
+          <input type="number" id="aiMaxTokens" value="4096" min="256" max="32768" step="256">
+        </div>
+        <div class="form-group">
+          <label for="aiTemperature">Temperature (0 – 1)</label>
+          <input type="number" id="aiTemperature" value="0.2" min="0" max="1" step="0.05">
+          <p class="hint">Lower = more deterministic XML output.</p>
+        </div>
+        <div class="form-group">
+          <label for="aiTimeout">Request timeout (s)</label>
+          <input type="number" id="aiTimeout" value="60" min="15" max="300" step="5">
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Salesforce Connection ─────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">☁️</span> Salesforce Connection
+    </div>
+    <div class="card-body">
+
+      <div class="form-group">
+        <label for="sfInstanceUrl">Instance URL <span class="required">*</span></label>
+        <input type="url" id="sfInstanceUrl" placeholder="https://myorg.my.salesforce.com">
+        <p class="hint">Your Salesforce org URL (no trailing slash). For sandboxes use <code>https://test.salesforce.com</code> login domain.</p>
+      </div>
+
+      <div class="form-group">
+        <label for="sfClientId">Connected App Consumer Key <span class="required">*</span></label>
+        <input type="text" id="sfClientId" placeholder="3MVG9…" autocomplete="off">
+        <p class="hint">
+          Create a Connected App in Setup → App Manager. Set the redirect URI to:
+          <br><code id="redirectUriDisplay">chrome-extension://&lt;extension-id&gt;/</code>
+          <br>Enable OAuth scopes: <em>api</em>, <em>refresh_token</em>.
+          PKCE is used – no client secret is required or stored.
+        </p>
+      </div>
+
+      <div class="form-group">
+        <label for="sfApiVersion">Salesforce API Version <span class="required">*</span></label>
+        <select id="sfApiVersion">
+          <option value="63.0">63.0 (Spring '25)</option>
+          <option value="62.0" selected>62.0 (Winter '25)</option>
+          <option value="61.0">61.0 (Summer '24)</option>
+          <option value="60.0">60.0 (Spring '24)</option>
+          <option value="59.0">59.0 (Winter '24)</option>
+          <option value="58.0">58.0 (Summer '23)</option>
+          <option value="57.0">57.0 (Spring '23)</option>
+          <option value="56.0">56.0 (Winter '23)</option>
+          <option value="55.0">55.0 (Summer '22)</option>
+        </select>
+        <p class="hint">Applied to generated Flow Metadata XML and to all Tooling API calls.</p>
+      </div>
+
+      <hr>
+
+      <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap; margin-bottom:12px;">
+        <div id="connStatus" class="conn-status unknown">
+          <span class="dot"></span> Not connected
+        </div>
+        <span id="connDetail" style="font-size:12px; color:var(--muted);"></span>
+      </div>
+
+      <div class="btn-group">
+        <button class="btn btn-primary" id="btnConnect">🔗 Connect to Salesforce</button>
+        <button class="btn btn-secondary" id="btnTestConn">🔄 Test Connection</button>
+        <button class="btn btn-danger"   id="btnDisconnect" style="display:none">🔌 Disconnect</button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── Advanced ──────────────────────────────────────────────── -->
+  <div class="card">
+    <div class="card-header">
+      <span class="icon">⚙️</span> Advanced
+    </div>
+    <div class="card-body">
+
+      <div class="row">
+        <div class="form-group">
+          <label for="pollInterval">Health poll interval (min)</label>
+          <input type="number" id="pollInterval" value="5" min="1" max="60" step="1">
+        </div>
+        <div class="form-group">
+          <label for="sfTimeout">Salesforce request timeout (s)</label>
+          <input type="number" id="sfTimeout" value="30" min="10" max="120" step="5">
+        </div>
+      </div>
+
+      <div class="toggle-row" style="margin-top:8px;">
+        <label for="debugLogging">Debug logging</label>
+        <label class="toggle">
+          <input type="checkbox" id="debugLogging">
+          <span class="slider"></span>
+        </label>
+      </div>
+      <p class="hint" style="margin-top:4px;">Enables verbose console output and log panel below.</p>
+
+      <hr>
+
+      <div class="form-group">
+        <label>Extension Log</label>
+        <div class="log-box" id="logBox">No log entries yet.</div>
+      </div>
+      <div class="btn-group" style="margin-top:8px;">
+        <button class="btn btn-secondary" id="btnRefreshLogs">↻ Refresh Logs</button>
+        <button class="btn btn-secondary" id="btnClearLogs">🗑 Clear Logs</button>
+        <button class="btn btn-secondary" id="btnDownloadLogs">⬇ Download Logs</button>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /.container -->
+
+<!-- ── Save bar ──────────────────────────────────────────────────── -->
+<div class="save-bar">
+  <span class="saved-msg" id="savedMsg">✔ Settings saved</span>
+  <div style="display:flex; gap:10px;">
+    <button class="btn btn-secondary" id="btnReset">Reset to Defaults</button>
+    <button class="btn btn-primary"   id="btnSave">💾 Save Settings</button>
+  </div>
+</div>
+
+<!-- Toast container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script type="module" src="options.js"></script>
+</body>
+</html>
