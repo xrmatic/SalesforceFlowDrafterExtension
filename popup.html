@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Salesforce Flow Drafter</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+
+<!-- ── Header ─────────────────────────────────────────────────────── -->
+<div class="header">
+  <img src="icons/icon48.png" alt="logo">
+  <h1>Flow Drafter</h1>
+  <div class="header-actions">
+    <button class="icon-btn" id="btnRefreshConn" title="Check Salesforce connection">🔄</button>
+    <button class="icon-btn" id="btnNewChat"     title="Start new conversation">✏️</button>
+    <button class="icon-btn" id="btnSettings"    title="Open Settings">⚙️</button>
+  </div>
+</div>
+
+<!-- ── Status bar ──────────────────────────────────────────────────── -->
+<div class="status-bar">
+  <div class="conn-pill unknown" id="connPill">
+    <span class="dot"></span> Not connected
+  </div>
+  <span class="status-msg" id="statusMsg">Configure Salesforce in Settings to get started.</span>
+</div>
+
+<!-- ── Tabs ────────────────────────────────────────────────────────── -->
+<div class="main" style="position:relative;">
+
+  <div class="tabs">
+    <div class="tab active" data-tab="chat">💬 Chat</div>
+    <div class="tab"        data-tab="xml">📄 XML Preview</div>
+    <div class="tab"        data-tab="history">📋 History</div>
+  </div>
+
+  <!-- ── Chat panel ──────────────────────────────────────────────── -->
+  <div class="tab-panel active" id="panel-chat">
+    <div class="chat-messages" id="chatMessages">
+      <div class="msg msg-system">
+        Describe the Salesforce Flow you want to build. I'll generate the Flow Metadata XML
+        and you can deploy it directly to your org.
+      </div>
+    </div>
+
+    <div class="typing-indicator" id="typingIndicator">
+      <div class="dot-bounce"></div>
+      <div class="dot-bounce"></div>
+      <div class="dot-bounce"></div>
+    </div>
+
+    <div class="chat-input-area">
+      <textarea
+        id="chatInput"
+        rows="2"
+        placeholder="e.g. Create a screen flow that collects a contact name and sends a welcome email…"
+      ></textarea>
+      <button class="send-btn" id="btnSend" title="Send (Ctrl+Enter)">➤</button>
+    </div>
+  </div>
+
+  <!-- ── XML preview panel ───────────────────────────────────────── -->
+  <div class="tab-panel" id="panel-xml">
+    <div class="xml-panel">
+      <div class="xml-toolbar">
+        <span id="xmlFlowName">No XML generated yet</span>
+        <button class="btn btn-secondary" id="btnCopyXml"   style="font-size:11px;padding:4px 8px;">📋 Copy</button>
+        <button class="btn btn-secondary" id="btnEditXml"   style="font-size:11px;padding:4px 8px;">✏️ Edit</button>
+        <button class="btn btn-secondary" id="btnClearXml"  style="font-size:11px;padding:4px 8px;">🗑 Clear</button>
+      </div>
+      <div class="xml-editor" id="xmlEditor" contenteditable="false" spellcheck="false"></div>
+    </div>
+
+    <div class="deploy-bar">
+      <input
+        type="text"
+        class="flow-name-input"
+        id="deployFlowName"
+        placeholder="Flow API name (auto-detected)"
+      >
+      <button class="btn btn-success" id="btnDeploy">🚀 Deploy to Salesforce</button>
+    </div>
+  </div>
+
+  <!-- ── History panel ───────────────────────────────────────────── -->
+  <div class="tab-panel" id="panel-history">
+    <div class="history-list" id="historyList">
+      <div class="history-empty">No previous flows yet. Generate a flow using the Chat tab.</div>
+    </div>
+    <div style="padding:8px; border-top:1px solid var(--border); background:#fff; display:flex; justify-content:flex-end;">
+      <button class="btn btn-secondary" id="btnClearHistory" style="font-size:11px;">🗑 Clear History</button>
+    </div>
+  </div>
+
+  <!-- ── Progress overlay ──────────────────────────────────────────── -->
+  <div class="progress-overlay" id="progressOverlay">
+    <div class="spinner"></div>
+    <div class="progress-msg" id="progressMsg">Working…</div>
+    <button class="btn btn-secondary" id="btnCancelOp" style="font-size:11px; margin-top:4px;">Cancel</button>
+  </div>
+
+</div><!-- /.main -->
+
+<script type="module" src="popup.js"></script>
+</body>
+</html>
